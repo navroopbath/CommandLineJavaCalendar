@@ -14,16 +14,10 @@ public class Event {
      * Constructor for Event expects eventDateAndTime to be of format
      * "MM/dd/yyyy HH:mm". This is strictly enforced for consistency.
      */
-    Event(String eventTitle, String eventDateAndTime, String eventNotes) {
+    Event(String eventTitle, LocalDateTime eventDateTime, String eventNotes) {
         this.eventTitle = eventTitle;
         this.eventNotes = eventNotes;
-
-        DateTimeFormatter eventDateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
-        try {
-            this.eventDateTime = this.eventDateTime.parse(eventDateAndTime, eventDateTimeFormatter);
-        } catch (DateTimeParseException e) {
-            System.out.println(e);
-        }
+        this.eventDateTime = eventDateTime;
     }
 
     public String getEventTitle() {

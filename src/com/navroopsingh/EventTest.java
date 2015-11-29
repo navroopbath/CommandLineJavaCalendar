@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import java.time.LocalDateTime;
 
 /**
  * Created by navroopsingh on 11/24/15.
@@ -13,7 +14,8 @@ public class EventTest {
 
     @Before
     public void setUp() throws Exception {
-        this.event = new Event("Thanksgiving", "11/26/2015 18:00", "Gather round and give your thanks.");
+        LocalDateTime eventDateTime = LocalDateTime.of(2015, 11, 26, 18, 0);
+        this.event = new Event("Thanksgiving", eventDateTime, "Gather round and give your thanks.");
     }
 
     @Test
