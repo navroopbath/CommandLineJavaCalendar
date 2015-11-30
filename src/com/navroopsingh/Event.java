@@ -32,6 +32,19 @@ public class Event {
         return this.eventDateTime;
     }
 
+    void updateEventTitle(String newEventTitle) {
+        this.eventTitle = newEventTitle;
+    }
+
+    void updateEventDateTime(LocalDateTime updatedEventDateTime) {
+        this.eventDateTime = updatedEventDateTime;
+    }
+
+    void updateEventNotes(String updatedEventNotes) {
+        this.eventNotes = updatedEventNotes;
+    }
+
+
     @Override
     public String toString() {
         int numCharactersBetweenPipes = 20;

@@ -15,7 +15,7 @@ public class EventTest {
     @Before
     public void setUp() throws Exception {
         LocalDateTime eventDateTime = LocalDateTime.of(2015, 11, 26, 18, 0);
-        this.event = new Event("Thanksgiving", eventDateTime, "Gather round and give your thanks.");
+        this.event = new Event("Thanksgiving 2016", eventDateTime, "Gather round and give your thanks.");
     }
 
     @Test
@@ -24,4 +24,5 @@ public class EventTest {
         assertEquals("Gather round and give your thanks.", this.event.getEventNotes());
         assertEquals("11/26/2015 @ 6:00PM | Thanksgiving         | Notes: Gather round and give your thanks.", this.event.toString());
     }
+
 }
