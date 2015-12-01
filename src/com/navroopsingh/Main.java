@@ -26,16 +26,16 @@ public class Main {
             System.out.print(">>> ");
             String input = scanner.nextLine();
             input = input.trim();
+            String[] input_parts = input.split(" ");
 
-            if (input.length() == 1) {
+            if (input_parts.length == 1) {
                 // The only valid single word command is "exit"
-                if (input == "exit") {
+                if (input_parts[0].equals("exit")) {
                     application_status = "exit";
                 } else {
                     System.out.println("Invalid command. Please try again.");
                 }
-            } else if (input.length() > 1) {
-                String[] input_parts = input.split(" ");
+            } else if (input_parts.length > 1) {
                 // extract the operation type
                 String operation_type = input_parts[0].toLowerCase();
                 String event_indicator = input_parts[1].toLowerCase();
@@ -198,7 +198,7 @@ public class Main {
         if (field_to_update.equals("title")) {
             // Get the new event title from user input
             String newEventTitle  = "";
-            while (!eventTitle.matches("[\\w\\p{Punct} ]+")) {
+            while (newEventTitle.equals("") || !eventTitle.matches("[\\w\\p{Punct} ]+")) {
                 System.out.print("      Enter the new event title (can contain letters, digits, punctuation, and spaces): ");
                 newEventTitle = scanner.nextLine();
             }
