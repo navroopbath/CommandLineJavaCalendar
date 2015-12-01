@@ -1,6 +1,7 @@
 package com.navroopsingh;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
@@ -42,8 +43,11 @@ public class Calendar {
     /*
     Add a one-time scheduled event to the calendar.
      */
-    public void addEvent(String eventTitle, LocalDateTime eventDateTime, String eventNotes) {
-        LocalDateTime currentDateTime = LocalDateTime.now();
+    public void addEvent(String eventTitle, LocalDateTime eventDateTime, String eventNotes)
+                         throws InputMismatchException {
+        LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.of("America/Los_Angeles"));
+        System.out.println(currentDateTime);
+        System.out.println(eventDateTime);
 
         // Ensure that the event date is not further than 1 year from now
         if (currentDateTime.plusYears(CALENDAR_LENGTH).isBefore(eventDateTime) ||
@@ -67,8 +71,8 @@ public class Calendar {
         3. The recurringEvent is one of ["daily", "weekly", "monthly", "yearly"]
      */
     public void addEvent(String eventTitle, LocalDateTime eventDateTime, String eventNotes,
-                         String recurringEvent) {
-        LocalDateTime currentDateTime = LocalDateTime.now();
+                         String recurringEvent) throws InputMismatchException {
+        LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.of("America/Los_Angeles"));
 
         // Ensure that the event date is not further than 1 year from now and that
         // the event date is not before the current date
@@ -105,13 +109,28 @@ public class Calendar {
     }
 
     /*
+     * Removes the event from the array.
+     */
+    public Event removeEvent(String eventTitle, LocalDateTime eventDateTime) {
+        String eventKey = Calendar.createEventKey(eventTitle, eventDateTime);
+        if (this.eventsHashMap.containsKey(eventKey)) {
+            Event event = this.eventsHashMap.get(eventKey);
+            this.eventsHashMap.remove(eventKey);
+            this.eventsTreeMap.remove(eventDateTime);
+            return event;
+        } else {
+            return null;
+        }
+    }
+
+    /*
      Returns the event matching eventTitle and eventDateTime and null if no
      match is found.
      */
     public Event findEvent(String eventTitle, LocalDateTime eventDateTime) {
         String eventKey = Calendar.createEventKey(eventTitle, eventDateTime);
-        if (this.eventsTreeMap.containsKey(eventKey)) {
-            return this.eventsTreeMap.get(eventKey);
+        if (this.eventsHashMap.containsKey(eventKey)) {
+            return this.eventsHashMap.get(eventKey);
         } else {
             return null;
         }

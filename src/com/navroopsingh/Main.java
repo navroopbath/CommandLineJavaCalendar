@@ -3,10 +3,7 @@ package com.navroopsingh;
 import java.text.ParseException;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     private static final ArrayList<String> commands =
@@ -51,12 +48,16 @@ public class Main {
                     switch (operation_type) {
                         case "view":
                             viewCalendar(event_indicator);
+                            break;
                         case "insert":
-                            ;
+                            insertIntoCalendar();
+                            break;
                         case "delete":
-                            ;
+                            deleteFromCalendar();
+                            break;
                         case "update":
-                            ;
+                            updateInCalendar();
+                            break;
                         default: break;
                     }
                 }
@@ -96,8 +97,8 @@ public class Main {
         System.out.println(welcome_message);
     }
 
-    protected void viewCalendar(String event_indicator) {
-        if (event_indicator.matches("event")) {
+    private void viewCalendar(String event_indicator) {
+        if (event_indicator.equals( "event" )) {
             // Uniquely identify the event from user input
             ArrayList eventInfo = uniquelyIdentifyEvent();
             String eventTitle = (String) eventInfo.get(0);
@@ -110,6 +111,122 @@ public class Main {
             } else {
                 System.out.println(event.toString());
             }
+        } else if (event_indicator.equals( "events" )) {
+            // Just print out the entire calendar for now. Add functionality for
+            // range search later.
+            System.out.println(calendar);
+        }
+    }
+
+    private void insertIntoCalendar() {
+        // Capture event title and event date and time from user input
+        ArrayList eventInfo = uniquelyIdentifyEvent();
+        String eventTitle = (String) eventInfo.get(0);
+        LocalDateTime eventDateTime = (LocalDateTime) eventInfo.get(1);
+
+        // Capture event notes from user input
+        String eventNotes = "";
+        while (!eventNotes.matches("[\\w\\p{Punct} ]+")) {
+            System.out.print("      Enter event notes (can contain letters, digits, punctuation, and spaces): ");
+            eventNotes = scanner.nextLine();
+            if (!eventNotes.matches("[\\w\\p{Punct} ]+")) {
+                System.out.println("        Incorrect format for event notes. Try again.");
+            }
+        }
+
+        // Capture the event recurring type from user input
+        String repeatType = "";
+        while (!repeatType.matches("\\bnone|daily|weekly|monthly|yearly\\b")) {
+            System.out.print("      Enter how often the event is recurring: (one of [none, daily, weekly, monthly, yearly] ): ");
+            repeatType = scanner.nextLine();
+        }
+
+        // Schedule new event on calendar from obtained user input
+        try { // Try to schedule an event with the user-set parameters
+            if (repeatType.matches("none$")) {
+                calendar.addEvent(eventTitle, eventDateTime, eventNotes);
+            } else { // schedule a recurring event
+                calendar.addEvent(eventTitle, eventDateTime, eventNotes, repeatType);
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("        Error while creating event. Event date must be within one year of today's date.");
+        }
+    }
+
+    private void deleteFromCalendar() {
+        System.out.println("Which event would you like to delete?\n");
+        // Capture event title and event date and time from user input
+        ArrayList eventInfo = uniquelyIdentifyEvent();
+        String eventTitle = (String) eventInfo.get(0);
+        LocalDateTime eventDateTime = (LocalDateTime) eventInfo.get(1);
+
+        // Fetch the event from the calendar
+        Event event = calendar.findEvent(eventTitle, eventDateTime);
+        if (event == null) {
+            System.out.println("    Event not found. Try again");
+            return;
+        }
+
+        calendar.removeEvent(eventTitle, eventDateTime);
+        System.out.printf("The following event has been removed: %s\n", event);
+    }
+
+    private void updateInCalendar() {
+        System.out.println("Which event would you like to update?\n");
+        // Capture event title and event date and time from user input
+        ArrayList eventInfo = uniquelyIdentifyEvent();
+        String eventTitle = (String) eventInfo.get(0);
+        LocalDateTime eventDateTime = (LocalDateTime) eventInfo.get(1);
+
+        // Fetch the event from the calendar
+        Event event = calendar.findEvent(eventTitle, eventDateTime);
+        if (event == null) {
+            System.out.println("    Event not found. Try again");
+            return;
+        }
+
+        String field_to_update = "";
+        while (!field_to_update.matches("\\btitle|date|time|notes\\b")) {
+            // Grab the field the user wants to update: event title, event date or time, or event notes
+            System.out.print("      Enter the field you want to update: (one of [title, date, time, notes]): ");
+            field_to_update = scanner.nextLine();
+            if (!field_to_update.matches("\\btitle|date|time|notes\\b")) {
+                System.out.println("        Invalid field type specified. Try again.");
+            }
+        }
+
+        if (field_to_update.equals("title")) {
+            // Get the new event title from user input
+            String newEventTitle  = "";
+            while (!eventTitle.matches("[\\w\\p{Punct} ]+")) {
+                System.out.print("      Enter the new event title (can contain letters, digits, punctuation, and spaces): ");
+                newEventTitle = scanner.nextLine();
+            }
+            // Update the event title
+            calendar.updateEventTitle(eventTitle, eventDateTime, newEventTitle);
+        } else if (field_to_update.equals("date") || field_to_update.equals("time")) {
+            // Get the new event DateTime from user input
+            LocalDateTime newEventDateTime = parseDateTime(eventTitle);
+
+            // Update the event DateTime
+            try {
+                calendar.updateEventDateTime(eventTitle, eventDateTime, newEventDateTime);
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid date and time entered. Try updating event again");
+            }
+        } else if (field_to_update.equals("notes")) {
+            // Capture new user event notes from user input
+            String eventNotes = "";
+            while (!eventNotes.matches("[\\w\\p{Punct} ]+")) {
+                System.out.print("      Enter new event notes (can contain letters, digits, punctuation, and spaces): ");
+                eventNotes = scanner.nextLine();
+                if (!eventNotes.matches("[\\w\\p{Punct} ]+")) {
+                    System.out.println("        Incorrect format for event notes. Try again.");
+                }
+            }
+            calendar.updateEventNotes(eventTitle, eventDateTime, eventNotes);
+        } else {
+            System.out.println("Error while updating event. Please try again.");
         }
     }
 
@@ -123,11 +240,21 @@ public class Main {
 
         // Get event title from user input, which is only allowed to contain word characters
         String eventTitle  = "";
-        while (!eventTitle.matches("\\w+")) {
-            System.out.print("      Enter the event title (word characters: [a-zA-Z_0-9]]): ");
+        while (!eventTitle.matches("[\\w\\p{Punct} ]+")) {
+            System.out.print("      Enter the event title (can contain letters, digits, punctuation, and spaces): ");
             eventTitle = scanner.nextLine();
         }
 
+        // Get event DateTime for the user
+        LocalDateTime eventDateTime = parseDateTime(eventTitle);
+
+        ArrayList eventInfo = new ArrayList();
+        eventInfo.add(0, eventTitle);
+        eventInfo.add(1, eventDateTime);
+        return eventInfo;
+    }
+
+    private LocalDateTime parseDateTime(String eventTitle) {
         // Create a LocalDateTime object from user input
         LocalDateTime eventDateTime = null;
         while (eventDateTime == null) {
@@ -136,13 +263,19 @@ public class Main {
             while (!eventDate.matches("\\d{2}/\\d{2}/\\d{4}$")) {
                 System.out.print("      Enter the event date (MM/dd/yyyy): ");
                 eventDate = scanner.nextLine();
+                if (!eventDate.matches("\\d{2}/\\d{2}/\\d{4}$")) {
+                    System.out.println("        \nEntered invalid date format. Try again. \n");
+                }
             }
 
             // Get the event's Time from the user
             String eventTime = "";
             while (!eventTime.matches("\\d{1,}:\\d{2} pm|am")) {
-                System.out.print("      Enter the event time (h:mm am|pm): ");
+                System.out.print("      Enter the event time (hh:mm am|pm): ");
                 eventTime = scanner.nextLine();
+                if (!eventTime.matches("\\d{1,}:\\d{2} pm|am")) {
+                    System.out.print("        \nEntered invalid time format. Try again. \n");
+                }
             }
 
             // Parse the strings to create a LocalDateTime object
@@ -153,17 +286,30 @@ public class Main {
             int year = Integer.parseUnsignedInt(dateParts[2]);
             int hour = Integer.parseUnsignedInt(timeParts[0].split(":")[0]);
             int minute = Integer.parseUnsignedInt(timeParts[0].split(":")[1]);
+            String meridiem = timeParts[1];
 
             try {
+                hour = this.convert_hour_to_24hr_clock(hour, meridiem);
                 eventDateTime = LocalDateTime.of(year, month, dayOfMonth, hour, minute);
             } catch (DateTimeException e) {
-                continue; // Run the loop again to ask the user for a valid date
+                System.out.printf("        \nError occurred while creating event %s on %d/%d/%d." +
+                        " Try again with valid date.\n", eventTitle, month, dayOfMonth, year);
+                // Run the loop again to ask the user for a valid date
             }
         }
 
-        ArrayList eventInfo = new ArrayList();
-        eventInfo.add(0, eventTitle);
-        eventInfo.add(1, eventDateTime);
-        return eventInfo;
+        return eventDateTime;
+    }
+
+    private int convert_hour_to_24hr_clock(int hour, String meridiem) {
+        if (meridiem.equals("pm") && hour == 12) {
+            return hour;
+        } else if (meridiem.equals("am") && hour == 12) {
+            return 0;
+        } else if (meridiem.equals("pm")) {
+            return 12 + hour;
+        } else {
+            return hour;
+        }
     }
 }

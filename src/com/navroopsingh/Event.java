@@ -2,7 +2,6 @@ package com.navroopsingh;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 public class Event {
     protected String eventTitle;
@@ -49,7 +48,7 @@ public class Event {
     public String toString() {
         int numCharactersBetweenPipes = 20;
         int lengthOfEventTitle = this.getEventTitle().length();
-        DateTimeFormatter eventDateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy @ h:mma");
+        DateTimeFormatter eventDateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy @ h:mm a");
         return this.eventDateTime.format(eventDateFormatter) + " | " +
                 this.getEventTitle() +
                 this.createEmptyString(numCharactersBetweenPipes - lengthOfEventTitle) +
